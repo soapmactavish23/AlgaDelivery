@@ -11,14 +11,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-@Getter
-@Setter(AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@Setter(AccessLevel.PRIVATE)
+@Getter
 public class Delivery {
 
     @EqualsAndHashCode.Include
     private UUID id;
+
     private UUID courierId;
 
     private DeliveryStatus status;
@@ -42,7 +43,7 @@ public class Delivery {
     public static Delivery draft() {
         Delivery delivery = new Delivery();
         delivery.setId(UUID.randomUUID());
-        delivery.setStatus(DeliveryStatus.DRAFT);
+        delivery.setStatus( DeliveryStatus.DRAFT);
         delivery.setTotalItems(0);
         delivery.setTotalCost(BigDecimal.ZERO);
         delivery.setCourierPayout(BigDecimal.ZERO);
@@ -63,8 +64,9 @@ public class Delivery {
     }
 
     public void changeItemQuantity(UUID itemId, int quantity) {
-        Item item = getItems().stream().filter(i -> i.getId().equals(itemId)).findFirst()
-                .orElseThrow();
+        Item item = getItems().stream().filter(i -> i.getId().equals(itemId))
+                .findFirst().orElseThrow();
+
         item.setQuantity(quantity);
         calculateTotalItems();
     }
@@ -76,10 +78,12 @@ public class Delivery {
 
     public void editPreparationDetails(PreparationDetails details) {
         verifyIfCanBeEdited();
+
         setSender(details.getSender());
         setRecipient(details.getRecipient());
         setDistanceFee(details.getDistanceFee());
         setCourierPayout(details.getCourierPayout());
+
         setExpectedDeliveryAt(OffsetDateTime.now().plus(details.getExpectedDeliveryTime()));
         setTotalCost(this.getDistanceFee().add(this.getCourierPayout()));
     }
@@ -111,16 +115,16 @@ public class Delivery {
     }
 
     private void verifyIfCanBePlaced() {
-        if(!isFilled()) {
+        if (!isFilled()) {
             throw new DomainException();
         }
-        if(!getStatus().equals(DeliveryStatus.DRAFT)) {
+        if (!getStatus().equals(DeliveryStatus.DRAFT)) {
             throw new DomainException();
         }
     }
 
     private void verifyIfCanBeEdited() {
-        if(!getStatus().equals(DeliveryStatus.DRAFT)) {
+        if (!getStatus().equals(DeliveryStatus.DRAFT)) {
             throw new DomainException();
         }
     }
@@ -132,8 +136,8 @@ public class Delivery {
     }
 
     @Getter
-    @Builder
     @AllArgsConstructor
+    @Builder
     public static class PreparationDetails {
         private ContactPoint sender;
         private ContactPoint recipient;
