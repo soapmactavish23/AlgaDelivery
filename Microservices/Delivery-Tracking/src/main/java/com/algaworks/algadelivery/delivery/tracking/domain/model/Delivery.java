@@ -11,10 +11,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+@Getter
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Setter(AccessLevel.PRIVATE)
-@Getter
 public class Delivery {
 
     @EqualsAndHashCode.Include
@@ -90,19 +90,26 @@ public class Delivery {
 
     public void place() {
         verifyIfCanBePlaced();
-        this.setStatus(DeliveryStatus.WAITING_FOR_COURIER);
+        this.changeStatusTo(DeliveryStatus.WAITING_FOR_COURIER);
         this.setPlacedAt(OffsetDateTime.now());
     }
 
     public void pickUp(UUID courierId) {
         this.setCourierId(courierId);
-        this.setStatus(DeliveryStatus.IN_TRANSIT);
+        this.changeStatusTo(DeliveryStatus.IN_TRANSIT);
         this.setAssignedAt(OffsetDateTime.now());
     }
 
     public void markAsDelivered() {
-        this.setStatus(DeliveryStatus.DELIVERY);
+        this.changeStatusTo(DeliveryStatus.DELIVERY);
         this.setFulfilledAt(OffsetDateTime.now());
+    }
+
+    private void changeStatusTo(DeliveryStatus newStatus) {
+        if(newStatus != null && this.getStatus().canNotChangeTo(newStatus)) {
+            throw new DomainException("Invalid status transition from " + this.getStatus() + " to " + newStatus);
+        }
+        this.setStatus(newStatus);
     }
 
     public List<Item> getItems() {
